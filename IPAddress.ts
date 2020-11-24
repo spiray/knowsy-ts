@@ -2,18 +2,12 @@ import ping from 'ping';
 import { isV4Format } from 'ip';
 import util from 'util';
 import dns from 'dns';
-import TraceRoute from 'nodejs-traceroute'
+// @ts-ignore
+import TraceRoute from 'traceroute'
+import { MyLookupResponse, MyPingResponse, TraceResponse } from './types';
 
 const lookup = util.promisify(dns.lookup);
-interface MyPingResponse {
-    alive: boolean;
-    output: string;
-}
-
-interface MyLookupResponse {
-    address: string;
-    family: number;
-}
+const trace = util.promisify(TraceRoute.trace);
 
 export default class IpAddress {
     // Represents an IP address
@@ -52,21 +46,9 @@ export default class IpAddress {
         return { address, family };
     }
 
-    async traceRoute() {
-        const tracer = new TraceRoute();
-        tracer.on('pid', (pid:string) => {
-                console.log(`pid: ${pid}`);
-            })
-            .on('destination', (destination:string) => {
-                console.log(`destination: ${destination}`);
-            })
-            .on('hop', (hop:Record<string,string>) => {
-                console.log(`hop: ${JSON.stringify(hop)}`);
-            })
-            .on('close', (code:string) => {
-                console.log(`close: code ${code}`);
-            });
-
-        tracer.trace('github.com');
+    async traceRoute(): Promise<TraceResponse> {
+        console.log('Tracing...')
+        const result = await trace(this.address);
+        return result.filter((line: boolean | Record<string, string>) => typeof line !== 'boolean');
     }
 }
