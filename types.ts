@@ -1,4 +1,4 @@
-export type IPPrompt = Record<'ip', string>;
+export type IPPrompt = { ip: string, type: 'domain' | 'ip' };
 
 export interface MyPingResponse {
     alive: boolean;

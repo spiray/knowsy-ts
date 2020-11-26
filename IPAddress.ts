@@ -7,6 +7,7 @@ import TraceRoute from 'traceroute'
 import { MyLookupResponse, MyPingResponse, TraceResponse } from './types';
 
 const lookup = util.promisify(dns.lookup);
+const reverse = util.promisify(dns.reverse);
 const trace = util.promisify(TraceRoute.trace);
 
 export default class IpAddress {
@@ -46,7 +47,12 @@ export default class IpAddress {
         return { address, family };
     }
 
-    async traceRoute(): Promise<TraceResponse> {
+    async dnsReverse() {
+        const [host] = await reverse(this.address);
+        return host;
+    }
+
+    async traceRoute(): Promise<Array<TraceResponse>> {
         console.log('Tracing...')
         const result = await trace(this.address);
         return result.filter((line: boolean | Record<string, string>) => typeof line !== 'boolean');
